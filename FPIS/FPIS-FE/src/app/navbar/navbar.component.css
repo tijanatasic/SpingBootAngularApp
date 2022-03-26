@@ -1,0 +1,11 @@
+#navbarDropdown{
+    color: white;
+}
+.navbar-brand{
+    color: white;
+}
+a.al{
+    position: absolute;
+    right: 1%;
+    display: block;
+}

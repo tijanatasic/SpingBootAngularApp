@@ -1,0 +1,15 @@
+body { 
+    background-color: #222428;
+    padding-bottom: 5em;
+}
+p{
+    color: white;
+    text-align: center;
+}
+ion-card{
+    width: 40%;
+    margin: auto;
+    margin-top: 4%;
+}
+
+

@@ -1,0 +1,398 @@
+<body>
+    <app-navbar></app-navbar>
+    <ion-content color="dark">
+        <ion-card color="dark">
+          <h3>IZMENA POTVRDE O KVALITETU</h3>
+          <hr style="margin-top: 6%" />
+          <div *ngIf="potvrdaError != ''" class = "error-mess">
+            <button type="button" class="close" aria-label="Close"
+            (click)="closeError();">
+            <span aria-hidden="true">&times;</span>
+        </button>
+            {{potvrdaError}}</div>
+          <form #findPotvrda="ngForm" (ngSubmit)="findSelectedPotvrda(findPotvrda)">
+            <ion-row>
+              <ion-col size-sm="8" offset-sm="2">
+                <ion-item color="dark">
+                  <ion-label color="warning">ID potvrde:</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-input
+                    name="potvrdaId"
+                    #potvrdaId="ngModel"
+                    ngModel
+                    type="text"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size-sm="8" offset-sm="2">
+                <ion-item color="dark">
+                  <ion-label color="warning">Datum formiranja potvrde:</ion-label>
+                </ion-item>
+                <div class="input-group">
+                  <input
+                    name="datumPotvrde"
+                    #datumPotvrde="ngModel"
+                    ngModel
+                    id="datumPotvrde"
+                    class="form-control"
+                    placeholder="yyyy-mm-dd"
+                    name="dp"
+                    ngbDatepicker
+                    #dp="ngbDatepicker"
+                    readonly
+                    (dateSelect)="getDatumPotvrde($event)"
+                  />
+                  <div class="input-group-append">
+                    <button
+                      class="btn btn-outline-secondary calendar"
+                      (click)="dp.toggle()"
+                      type="button"
+                    ></button>
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+  
+            <ion-row class="ion-justify-content-center btn-pretraga">
+              <ion-col></ion-col>
+              <ion-col>
+                <ion-button
+                  type="submit"
+                  strong="true"
+                  color="warning"
+                  expand="block"
+                  shape="round"
+                  >Pretraga potvrda
+                </ion-button>
+              </ion-col>
+              <ion-col></ion-col>
+            </ion-row>
+          </form>
+
+
+          <p class="potvrda-no-results" *ngIf="potvrdaMessage">No rows to show.</p>
+          <div
+            class="table-zahtev"
+            *ngIf = "potvrdaTableVisible"
+          >
+            <div class="row header bg-dark row-h">
+              <div class="col">Potvrda ID</div>
+              <div class="col">Zahtev ID</div>
+              <div class="col">Datum</div>
+              <div class="col">Opis</div>
+              <div class="col">Mesto izdavanja</div>
+              <div class="col">Vrsta robe</div>
+            </div>
+            <div
+              class="row click"
+              style="margin-top: 2%"
+              *ngFor="let potvrda of potvrde" 
+              (click)="setStatePotvrdaAsActive(potvrda)" 
+              [style.background-color]="activePotvrdaId == potvrda.potvrdaOKvalitetuId ? '#343a40' : '#222428'"
+            >
+              <div class="col">{{potvrda.potvrdaOKvalitetuId}}</div>
+              <div class="col">{{potvrda.zahtevZaProveromKvalitetaId.id}}</div>
+              <div class="col">{{potvrda.datumPotvrde}}</div>
+              <div class="col">{{potvrda.opisPotvrde}}</div>
+              <div class="col">{{potvrda.mestoIzdavanja}}</div>
+              <div class="col">{{potvrda.vrstaRobe}}</div>
+            </div>
+          </div>
+
+          <hr />
+
+
+          <form #save="ngForm" (ngSubmit)="updatePotvrda(save)">
+            <ion-grid>
+              <ion-row>
+                <ion-col size-sm="8" offset-sm="2">
+                  <ion-item color="dark">
+                    <ion-label color="warning">Potvrda o kvalitetu ID:</ion-label>
+                  </ion-item>
+                  <ion-item>
+                    <ion-input
+                      name="id"
+                      #id="ngModel"
+                      ngModel
+                      type="text"
+                      readonly
+                      class="id"
+                      [value]="activePotvrda.potvrdaOKvalitetuId != undefined ? activePotvrda.potvrdaOKvalitetuId : ''"
+                    ></ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+    
+              <hr style="margin-top: 6%" />
+    
+              <ion-row class="ion-justify-content-center">
+                <ion-col></ion-col>
+                <ion-col>
+                  <ion-button
+                    strong="true"
+                    color="warning"
+                    expand="block"
+                    shape="round"
+                    (click)="open(content)"
+                    >Pretraga zahteva
+                  </ion-button>
+                </ion-col>
+                <ion-col></ion-col>
+              </ion-row>
+    
+              <ng-template #content let-modal>
+                <div  class="mod">
+                  <div class="modal-header">
+                    <h4 class="modal-title" id="modal-basic-title">
+                      Pretraga zahteva
+                    </h4>
+                    <button
+                      type="button"
+                      class="close"
+                      aria-label="Close"
+                      (click)="modal.dismiss('Cross click')"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div *ngIf="zahtevError != ''" class = "error-mess">
+                      <button type="button" class="close" aria-label="Close"
+                      (click)="closeError();">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+                      {{zahtevError}}</div>
+                    <form #find="ngForm" (ngSubmit)="getZahtevi(find)">
+                      <div class="form-group">
+                        <label for="sifraZahteva">Unesite sifru zahteva:</label>
+                        <div class="input-group">
+                          <input
+                            name="sifraZahteva"
+                            #sifraZahteva="ngModel"
+                            ngModel
+                            type="text"
+                            id="sifraZahteva"
+                            class="form-control"
+                          />
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="datumFormiranja"
+                          >Unesite datum formiranja zahteva:</label
+                        >
+                        <div class="input-group">
+                          <input
+                            name="datumFormiranja"
+                            #datumFormiranja="ngModel"
+                            ngModel
+                            id="datumFormiranja"
+                            class="form-control"
+                            placeholder="yyyy-mm-dd"
+                            name="dp"
+                            ngbDatepicker
+                            #dp="ngbDatepicker"
+                            (dateSelect)="onSelect($event)"
+                            readonly
+                          />
+                          <div class="input-group-append">
+                            <button
+                              class="btn btn-outline-secondary calendar"
+                              (click)="dp.toggle()"
+                              type="button"
+                            ></button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <button type="submit" class="btn btn-outline-dark bt-margin">
+                        Pretrazi
+                      </button>
+                    </form>
+      
+                    <p class="no-results" *ngIf="zahteviMessage">No rows to show.</p>
+                    <table
+                      class="table"
+                      id="table"
+                      [style.display]="isVisible ? 'table' : 'none'"
+                    >
+                      <thead>
+                        <tr>
+                          <th scope="col">ID</th>
+                          <th scope="col">Proizvod ID</th>
+                          <th scope="col">Datum</th>
+                          <th scope="col">Napomena</th>
+                          <th scope="col">Zahtev kreirao</th>
+                          <th scope="col">Veterinar ID</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="click" *ngFor="let zahtev of zahtevi" (click)="setStateAsActive(zahtev)" [style.background-color]="activeId == zahtev.id ? 'silver' : 'white'">
+                          <th scope="row">{{ zahtev.id }}</th>
+                          <td>{{ zahtev.proizvodId.proizvodId }}</td>
+                          <td>{{ zahtev.datum }}</td>
+                          <td>{{ zahtev.napomena }}</td>
+                          <td>{{ zahtev.kupacId.nazivKupca }}</td>
+                          <td>{{ zahtev.veterinarId.veterinarId }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-outline-dark"
+                      (click)="modal.close('Save click')"
+                    >
+                      Izaberi
+                    </button>
+                  </div>
+                </div>
+                
+              </ng-template>
+    
+              <div
+                class="table-zahtev"
+                [style.display]="isIzaberi && zahtevi.length > 0 ? 'block' : 'none'"
+              >
+                <div class="row header bg-dark row-h">
+                  <div class="col">Zahtev ID</div>
+                  <div class="col">Proizvod ID</div>
+                  <div class="col">Datum</div>
+                  <div class="col">Napomena</div>
+                  <div class="col">Zahtev kreirao</div>
+                  <div class="col">Veterinar ID</div>
+                </div>
+                <div
+                  class="row"
+                  style="margin-top: 2%"
+                  *ngIf="zahtev.id !== undefined"
+                >
+                  <div class="col">{{ zahtev.id }}</div>
+                  <div class="col">{{ zahtev.proizvodId.proizvodId }}</div>
+                  <div class="col">{{ zahtev.datum }}</div>
+                  <div class="col">{{ zahtev.napomena }}</div>
+                  <div class="col">{{ zahtev.kupacId.nazivKupca }}</div>
+                  <div class="col">{{ zahtev.veterinarId.veterinarId }}</div>
+                </div>
+              </div>
+    
+              <hr />
+    
+              <ion-row>
+                <ion-col size-sm="8" offset-sm="2">
+                  <ion-item color="dark">
+                    <ion-label color="warning">Mesto izdavanja:</ion-label>
+                  </ion-item>
+                  <ion-item>
+                    <ion-input
+                      name="mestoIzdavanja"
+                      #mestoIzdavanja="ngModel"
+                      ngModel
+                      type="text"
+                      [value]="activePotvrda.potvrdaOKvalitetuId != undefined ? activePotvrda.mestoIzdavanja : ''"
+                    ></ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+    
+              <ion-row>
+                <ion-col size-sm="8" offset-sm="2">
+                  <ion-item color="dark">
+                    <ion-label color="warning">Vrsta robe:</ion-label>
+                  </ion-item>
+                  <ion-item>
+                    <ion-input
+                      name="vrstaRobe"
+                      #vrstaRobe="ngModel"
+                      ngModel
+                      type="text"
+                      [value]="activePotvrda.potvrdaOKvalitetuId != undefined ? activePotvrda.vrstaRobe : ''"
+                    ></ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+    
+              <ion-row>
+                <ion-col size-sm="8" offset-sm="2">
+                  <ion-item color="dark">
+                    <ion-label color="warning">Datum formiranja potvrde:</ion-label>
+                  </ion-item>
+                  <div class="input-group">
+                    <input
+                      name="datum"
+                      #datum="ngModel"
+                      ngModel
+                      id="datum"
+                      class="form-control"
+                      placeholder="yyyy-mm-dd"
+                      name="dp"
+                      ngbDatepicker
+                      #dp2="ngbDatepicker"
+                      (dateSelect)="getDatum($event)"
+                      readonly
+                      [value] = "datum2"
+                    />
+                    <div class="input-group-append">
+                      <button
+                        class="btn btn-outline-secondary calendar"
+                        (click)="dp2.toggle()"
+                        type="button"
+                      ></button>
+                    </div>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size-sm="8" offset-sm="2">
+                  <ion-item color="dark">
+                    <ion-label color="warning">Opis potvrde:</ion-label>
+                  </ion-item>
+                  <ion-item>
+                    <ion-textarea
+                      name="opis"
+                      #opis="ngModel"
+                      ngModel
+                      rows="3"
+                      cols="20"
+                      [value]="activePotvrda.potvrdaOKvalitetuId != undefined ? activePotvrda.opisPotvrde : ''"
+                    ></ion-textarea>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+    
+              <ion-row class="ion-justify-content-center">
+                <ion-col></ion-col>
+                <ion-col>
+                  <ion-button
+                    type="submit"
+                    strong="true"
+                    color="warning"
+                    expand="block"
+                    shape="round"
+                    [disabled] = "activePotvrda.potvrdaOKvalitetuId == undefined"
+                    >Azuriraj
+                  </ion-button>
+                </ion-col>
+                <ion-col></ion-col>
+                <ion-col *ngIf = "activePotvrda.potvrdaOKvalitetuId != undefined">
+                  <ion-button
+                  type="button"
+                  strong="true"
+                  color="danger"
+                  expand="block"
+                  shape="round"
+                  (click) = "obrisiPotvrdu()"
+                  >Obrisi
+                </ion-button>
+                </ion-col>
+                <ion-col  *ngIf = "activePotvrda.potvrdaOKvalitetuId != undefined"></ion-col>
+              </ion-row>
+            </ion-grid>
+          </form>
+
+        </ion-card>
+    </ion-content>
+</body>

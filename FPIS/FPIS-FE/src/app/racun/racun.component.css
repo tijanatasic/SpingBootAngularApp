@@ -1,0 +1,113 @@
+body { 
+    background-color: #222428;
+    padding-bottom: 5em;
+}
+p{
+    color: white;
+}
+ion-card{
+    width: 48%;
+    margin: auto;
+    margin-top: 4%;
+}
+hr{
+    background-color: #ffc409;
+}
+
+h3{
+    text-align: left;
+    color: #ffc409;
+    font-weight: bold;
+}
+.row-h{
+    margin-top: 5%; 
+    padding-top: 5px; 
+    padding-bottom: 5px;
+}
+.bt-margin{
+    margin-left: 90%;
+    margin-bottom: 4%;
+}
+.mod{
+    width: 800px;
+    background-color: white;
+    margin-left: -150px;
+}
+.click{
+    cursor: pointer;
+}
+.table-custom{
+    background-color:  #343a40;
+    border: 1px solid white;
+    text-align: center;
+    width: 70%;
+    margin: auto;
+}
+.custom-column{
+    margin-top: 20px;
+}
+.nacin-placanja-text{
+    border: 1px solid white;
+    height: 50px;
+}
+.custom-button{
+    margin-top: 18%;
+}
+.custom-input{
+    height: 40px;
+    width: 70px;
+    margin: auto;
+    background-color: silver;
+}
+.custom-input-proizvod{
+    height: 40px;
+    width: 150px;
+    margin: auto;
+    background-color: silver;
+}
+.custom-label{
+    text-align: center;
+}
+.custom-button2{
+    margin: auto;
+    margin-top: 30px;
+}
+.custom-button3{
+    margin: auto;
+    margin-bottom: 30px;
+}
+.custom-row{
+    height: 100px;
+}
+.inp-custom{
+    margin: auto;
+    margin-top: 6px;
+    height: 30px;
+}
+.inp-custom-radnik{
+    margin: auto;
+    height: 40px;
+}
+.kreiraj-button{
+    margin-top: 5%;
+}
+.border-td{
+    border: 1px solid white;
+}
+.error-mess{
+    height: 30px;
+    background-color: orange;
+    margin-bottom: 15px;
+    color: white;
+}
+.error-mess .close{
+    color: white;
+}
+.no-results{
+    text-align: center;
+    font-size: 15px;
+    color: grey;
+}
+.al{
+    color: red;
+}

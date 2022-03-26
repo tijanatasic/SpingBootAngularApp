@@ -1,0 +1,60 @@
+body { 
+    background-color: #222428;
+    padding-bottom: 5em;
+}
+p{
+    color: white;
+}
+ion-card{
+    width: 40%;
+    margin: auto;
+    margin-top: 4%;
+}
+hr{
+    background-color: #ffc409;
+}
+
+h3{
+    text-align: left;
+    color: #ffc409;
+    font-weight: bold;
+}
+.row-h{
+    margin-top: 5%; 
+    padding-top: 5px; 
+    padding-bottom: 5px;
+}
+.bt-margin{
+    margin-left: 90%;
+    margin-bottom: 4%;
+}
+.mod{
+    width: 800px;
+    background-color: white;
+    margin-left: -150px;
+}
+.click{
+    cursor: pointer;
+}
+.error-mess{
+    height: 30px;
+    background-color: orange;
+    margin-bottom: 15px;
+    color: white;
+}
+.error-mess .close{
+    color: white;
+}
+.no-results{
+    text-align: center;
+    font-size: 15px;
+    color: black;
+
+}
+.potvrda-no-results{
+    text-align: center;
+    font-size: 15px;
+    color: grey;
+    margin-top: 2%;
+    margin-bottom: 2%;
+}

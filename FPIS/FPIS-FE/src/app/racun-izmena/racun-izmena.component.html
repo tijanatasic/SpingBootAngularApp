@@ -1,0 +1,542 @@
+<body>
+    <app-navbar></app-navbar>
+    <ion-content color="dark">
+        <ion-card color="dark">
+            <h3>IZMENA RACUNA</h3>
+
+            <hr style="margin-top: 6%" />
+            <div *ngIf="racunError != ''" class="error-mess">
+                <button type="button" class="close" aria-label="Close" (click)="closeError();">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{racunError}}
+            </div>
+            <form #findRacun="ngForm" (ngSubmit)="findSelectedRacun(findRacun)">
+                <ion-row>
+                    <ion-col size-sm="8" offset-sm="2">
+                        <ion-item color="dark">
+                            <ion-label color="warning">ID racuna:</ion-label>
+                        </ion-item>
+                        <ion-item>
+                            <ion-input name="racunIdFind" #racunIdFind="ngModel" ngModel type="text"></ion-input>
+                        </ion-item>
+                    </ion-col>
+                </ion-row>
+                <ion-row>
+                    <ion-col size-sm="8" offset-sm="2">
+                        <ion-item color="dark">
+                            <ion-label color="warning">Rok placanja:</ion-label>
+                        </ion-item>
+                        <div class="input-group">
+                            <input name="rokPlacanjaFind" #rokPlacanjaFind="ngModel" ngModel id="rokPlacanjaFind"
+                                class="form-control" placeholder="yyyy-mm-dd" name="dp" ngbDatepicker
+                                #dp1="ngbDatepicker" readonly (dateSelect)="getRokPlacanjaFind($event)" />
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary calendar" (click)="dp1.toggle()"
+                                    type="button"></button>
+                            </div>
+                        </div>
+                    </ion-col>
+                </ion-row>
+
+                <ion-row class="ion-justify-content-center btn-pretraga">
+                    <ion-col></ion-col>
+                    <ion-col>
+                        <ion-button type="submit" strong="true" color="warning" expand="block" shape="round">Pretraga
+                            racuna
+                        </ion-button>
+                    </ion-col>
+                    <ion-col></ion-col>
+                </ion-row>
+            </form>
+
+
+            <p class="racun-no-results" *ngIf="racunMessage">No rows to show.</p>
+            <div class="table-zahtev" *ngIf="racunTableVisible">
+                <div class="row header bg-dark row-h">
+                    <div class="col">Racun ID</div>
+                    <div class="col">Rok placanja</div>
+                    <div class="col">Napomena</div>
+                    <div class="col">Kupac ID</div>
+                    <div class="col">Otpremnica ID</div>
+                </div>
+                <div class="row click" style="margin-top: 2%" *ngFor="let racun of pronadjeniRacuni"
+                    (click)="setStateRacunAsActive(racun)"
+                    [style.background-color]="activeRacunId == racun.racunKupcaId ? '#343a40' : '#222428'">
+                    <div class="col">{{racun.racunKupcaId}}</div>
+                    <div class="col">{{racun.rokPlacanjaKupca}}</div>
+                    <div class="col">{{racun.napomenaRacunaKupca}}</div>
+                    <div class="col">{{racun.kupacId.kupacId}}</div>
+                    <div class="col">{{racun.otpremnicaZaKupcaId.otpremnicaZaKupcaId}}</div>
+                </div>
+            </div>
+
+            <hr />
+
+
+            <form #update="ngForm" (ngSubmit)="updateRacun(update)">
+                <ion-grid>
+                    <ion-row>
+                        <ion-col size-sm="8" offset-sm="2">
+                            <ion-item color="dark">
+                                <ion-label color="warning">ID racuna:</ion-label>
+                            </ion-item>
+                            <ion-item>
+                                <ion-input name="racunId" #racunId="ngModel" ngModel type="text" disabled>{{activeRacun.racunKupcaId}}</ion-input>
+                            </ion-item>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size-sm="8" offset-sm="2">
+                            <ion-item color="dark">
+                                <ion-label color="warning">Rok za placanje:</ion-label>
+                            </ion-item>
+                            <div class="input-group">
+                                <input name="rokPlacanja" #rokPlacanja="ngModel" ngModel id="rokPlacanja"
+                                    class="form-control" placeholder="yyyy-mm-dd" name="dp" ngbDatepicker
+                                    #dp="ngbDatepicker" readonly (dateSelect)="onSelectRacun($event)" [value] = "datum2"/>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary calendar" (click)="dp.toggle()"
+                                        type="button" value="datum2"></button>
+                                </div>
+                            </div>
+                        </ion-col>
+                        <ion-col size-sm="8" offset-sm="2">
+                            <ion-item color="dark">
+                                <ion-label color="warning">Napomena:</ion-label>
+                            </ion-item>
+                            <ion-item>
+                                <ion-textarea name="napomena" #napomena="ngModel" ngModel rows="3" cols="20" [value]="activeRacun.napomenaRacunaKupca">
+                                </ion-textarea>
+                            </ion-item>
+                        </ion-col>
+                    </ion-row>
+                    <hr>
+                    <ion-row>
+                        <ion-col size-sm="5">
+                            <ion-item color="dark">
+                                <ion-label color="warning">Nacin placanja:</ion-label>
+                            </ion-item>
+                            <ion-item color="dark">
+                                <select id="placanjeCB" (change)="onChange($event)"
+                                    class="browser-default custom-select" name="nacinPlacanja" #nacinPlacanja="ngModel"
+                                    ngModel>
+                                    <option *ngFor="let nacin of naciniPlacanjaCB" [value]="nacin.nacinPlacanjaId">
+                                        {{nacin.naziv}}</option>
+                                </select>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col></ion-col>
+                        <ion-col size-sm="5">
+                            <ion-button (click)="dodajNacinPlacanja();" class="custom-button" type="button"
+                                strong="true" color="success" expand="block" shape="round">Dodaj
+                            </ion-button>
+                        </ion-col>
+                        <ion-col></ion-col>
+                    </ion-row>
+
+                    <ion-row *ngIf="naciniPlacanjaIzabrani.length>0">
+                        <ion-col class="custom-column">
+                            <table class="table-custom" id="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="nacin-placanja-text">Nacin placanja</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let nacin of naciniPlacanjaIzabrani">
+                                        <td class="border-td">{{nacin.naziv}} <span class="btn glyphicon al" (click)="removeNacinPlacanja(nacin.nacinPlacanjaId);">&#x2212;</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ion-col>
+                    </ion-row>
+
+                    <hr>
+
+                    <ion-row class="ion-justify-content-center">
+                        <ion-col></ion-col>
+                        <ion-col>
+                            <ion-button strong="true" color="warning" expand="block" shape="round"
+                                (click)="open(content)">Pretraga otpremnica
+                            </ion-button>
+                        </ion-col>
+                        <ion-col></ion-col>
+                    </ion-row>
+
+                    <ng-template #content let-modal>
+                        <div class="mod">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="modal-basic-title">
+                                    Pretraga otpremnica
+                                </h4>
+                                <button type="button" class="close" aria-label="Close"
+                                    (click)="modal.dismiss('Cross click')">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div *ngIf="otpremnicaError != ''" class="error-mess">
+                                    <button type="button" class="close" aria-label="Close" (click)="closeError();">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    {{otpremnicaError}}
+                                </div>
+                                <form #find="ngForm" (ngSubmit)="getOtpremnice(find)">
+                                    <div class="form-group">
+                                        <label for="otpremnicaId">Otpremnica ID:</label>
+                                        <div class="input-group">
+                                            <input name="otpremnicaId" #otpremnicaId="ngModel" ngModel type="text"
+                                                id="otpremnicaId" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="datumOtpremanja">Unesite datum otpremanja:</label>
+                                        <div class="input-group">
+                                            <input name="datumOtpremanja" #datumOtpremanja="ngModel" ngModel
+                                                id="datumOtpremanja" class="form-control" placeholder="yyyy-mm-dd"
+                                                name="dp" ngbDatepicker #dp="ngbDatepicker"
+                                                (dateSelect)="onSelectOtpremnica($event)" readonly />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary calendar" (click)="dp.toggle()"
+                                                    type="button"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-outline-dark bt-margin">
+                                        Pretrazi
+                                    </button>
+                                </form>
+
+                                <p class="no-results" *ngIf="otpremnicaMessage">No rows to show.</p>
+                                <table class="table" id="table" *ngIf="otpremnice.length>0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Otpremnica ID</th>
+                                            <th scope="col">Datum otpremanja</th>
+                                            <th scope="col">Otpremnicu dopremio</th>
+                                            <th scope="col">Otpremnicu izdao</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="click" *ngFor="let otp of otpremnice"
+                                            (click)="setOtpremnicaAsActive(otp)"
+                                            [style.background-color]="activeOtpremnicaId == otp.otpremnicaZaKupcaId ? 'silver' : 'white'">
+                                            <th scope="row">{{otp.otpremnicaZaKupcaId}}</th>
+                                            <td>{{otp.datumDopremanja}}</td>
+                                            <td>{{otp.radnikIdDoprema.imePrezime}}</td>
+                                            <td>{{otp.radnikIdIzdao.imePrezime}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">
+                                    Izaberi
+                                </button>
+                            </div>
+                        </div>
+
+                    </ng-template>
+
+
+                    <div class="table-zahtev" *ngIf="isIzabranaOtpremnica">
+                        <div class="row header bg-dark row-h" style="margin-top: 2%; height:50px">
+                            <div class="col">Otpremnica ID</div>
+                            <div class="col">Datum dopremanja</div>
+                            <div class="col">Kupac ID</div>
+                        </div>
+                        <div class="row">
+                            <div class="col">{{izabranaOtpremnica.otpremnicaZaKupcaId}}</div>
+                            <div class="col">{{izabranaOtpremnica.datumDopremanja}}</div>
+                            <div class="col">{{izabranaOtpremnica.kupacId.kupacId}}</div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <ion-row class="ion-justify-content-center">
+                        <ion-col></ion-col>
+                        <ion-col>
+                            <ion-button strong="true" color="warning" expand="block" shape="round"
+                                (click)="open2(contentProizvod)">Pretraga proizvoda
+                            </ion-button>
+                        </ion-col>
+                        <ion-col></ion-col>
+                    </ion-row>
+
+                    <ng-template #contentProizvod let-modal>
+                        <div class="mod">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="modal-basic-title">
+                                    Pretraga proizvoda
+                                </h4>
+                                <button type="button" class="close" aria-label="Close"
+                                    (click)="modal.dismiss('Cross click')">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div *ngIf="proizvodiError != ''" class="error-mess">
+                                    <button type="button" class="close" aria-label="Close" (click)="closeError();">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    {{proizvodiError}}
+                                </div>
+                                <form #find="ngForm" (ngSubmit)="getProizvodi(find)">
+                                    <div class="form-group">
+                                        <label for="prizvodId">Unesite ID proizvoda:</label>
+                                        <div class="input-group">
+                                            <input name="prizvodId" #prizvodId="ngModel" ngModel type="text"
+                                                id="prizvodId" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nazivProizvoda">Unesite naziv proizvoda:</label>
+                                        <div class="input-group">
+                                            <input name="nazivProizvoda" #nazivProizvoda="ngModel" ngModel type="text"
+                                                id="nazivProizvoda" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-outline-dark bt-margin">
+                                        Pretrazi
+                                    </button>
+                                </form>
+
+                                <p class="no-results" *ngIf="proizvodiMessage">No rows to show.</p>
+                                <table *ngIf="proizvodi.length>0" class="table" id="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Proizvod ID</th>
+                                            <th scope="col">Naziv proizvoda</th>
+                                            <th scope="col">Jedinica mere</th>
+                                            <th scope="col">Datum proizvodnje</th>
+                                            <th scope="col">Cena</th>
+                                            <th scope="col">Tip proizvoda</th>
+                                            <th scope="col">Trenutno stanje</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let p of proizvodi" class="click" (click)="setProizvodAsActive(p)"
+                                            [style.background-color]="activeProizvodId == p.proizvodId ? 'silver' : 'white'">
+                                            <th scope="row">{{p.proizvodId}}</th>
+                                            <td>{{p.nazivProizvoda}}</td>
+                                            <td>{{p.jedinicaMereId.nazivJediniceMere}}</td>
+                                            <td>{{p.datumProizvodnje}}</td>
+                                            <td>{{p.cena}}</td>
+                                            <td>{{p.tipProizvodaId.nazivTipaProizvoda}}</td>
+                                            <td>{{p.trenutnoStanjeZaliha}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">
+                                    Izaberi
+                                </button>
+                            </div>
+                        </div>
+                    </ng-template>
+
+                    <ion-row *ngIf="isProizvodIzabran">
+                        <ion-col>
+                            <ion-item color="dark">
+                                <ion-label class="custom-label" color="warning">ID proizvoda:</ion-label>
+                            </ion-item>
+                            <ion-item class="custom-input">
+                                <ion-input name="proizId" #proizId="ngModel" ngModel type="text" disabled>{{proizvId}}
+                                </ion-input>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col>
+                            <ion-item color="dark">
+                                <ion-label class="custom-label" color="warning">Naziv proizvoda:</ion-label>
+                            </ion-item>
+                            <ion-item class="custom-input-proizvod">
+                                <ion-input name="proizNaziv" #proizNaziv="ngModel" ngModel type="text" disabled>
+                                    {{nazivProizv}}</ion-input>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col>
+                            <ion-item color="dark">
+                                <ion-label class="custom-label" color="warning">Jedinica mere:</ion-label>
+                            </ion-item>
+                            <ion-item class="custom-input">
+                                <ion-input name="jm" #jm="ngModel" ngModel type="text" disabled>{{jedinicaMere}}
+                                </ion-input>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col>
+                            <ion-item color="dark">
+                                <ion-label class="custom-label" color="warning">Cena:</ion-label>
+                            </ion-item>
+                            <ion-item class="custom-input">
+                                <ion-input name="proizCena" #proizCena="ngModel" ngModel type="text" disabled>
+                                    {{cenaProiz}}</ion-input>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col>
+                            <ion-item color="dark">
+                                <ion-label class="custom-label" color="warning">Cena sa popustom:</ion-label>
+                            </ion-item>
+                            <ion-item class="custom-input">
+                                <ion-input id="proizCenaPopust" name="proizCenaPopust" #proizCenaPopust="ngModel"
+                                    ngModel type="text" disabled>{{cenaSaPopustom}}</ion-input>
+                            </ion-item>
+                        </ion-col>
+                    </ion-row>
+                    <hr>
+                    <ion-row *ngIf="isProizvodIzabran">
+                        <ion-col>
+                            <ion-item color="dark">
+                                <ion-label class="custom-label" color="warning">Narucena kolicina:</ion-label>
+                            </ion-item>
+                            <ion-item class="custom-input">
+                                <ion-input id="proizNarucenaKol" name="proizNarucenaKol" #proizNarucenaKol="ngModel"
+                                    ngModel type="number"></ion-input>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col>
+                            <ion-item color="dark">
+                                <ion-label class="custom-label" color="warning">Rabat:</ion-label>
+                            </ion-item>
+                            <ion-item class="custom-input">
+                                <ion-input id="rabat" name="rabat" #rabat="ngModel" ngModel type="number"></ion-input>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col>
+                            <ion-button (click)="dodajStavku();" class="custom-button2" strong="true" color="success"
+                                expand="block" shape="round" [disabled]="proizvId == ''">
+                                Dodaj stavku
+                            </ion-button>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row class="custom-row" *ngIf="isProizvodIzabran">
+                        <ion-col></ion-col>
+                        <ion-col></ion-col>
+                        <ion-col>
+                            <ion-button (click)="getCenaSaPopustom();" class="custom-button3" strong="true"
+                                color="medium" expand="block" shape="round" [disabled]="proizvId == ''">
+                                Izracunaj cenu
+                            </ion-button>
+                        </ion-col>
+
+                    </ion-row>
+
+                    <div class="table-zahtev" style="margin-top: 0;" *ngIf="stavkeRacuna.length > 0">
+                        <div class="row header bg-dark row-h" style="margin-top: 2%; height:50px">
+                            <div class="col">Stavka ID</div>
+                            <div class="col">Narucena kolicina</div>
+                            <div class="col">Rabat</div>
+                            <div class="col">Proizvod ID</div>
+                            <div class="col">Cena stavke</div>
+                            <div class="col">Naziv proizvoda</div>
+                        </div>
+                        <div *ngFor="let stavka of stavkeRacuna" class="row click"
+                            style="margin-top: 2%;margin-bottom: 4%" (click)="setStavkaAsActive(stavka)"
+                            [style.background-color]="activeStavkaId == stavka.stavkaRacunaId ? '#343a40' : '#222428'">
+                            <div class="col">{{stavka.stavkaRacunaId}}</div>
+                            <div class="col">{{stavka.kolicinaRobeZaPlacanje}}</div>
+                            <div class="col">{{stavka.rabat}}</div>
+                            <div class="col">{{stavka.proizvodId.proizvodId}}</div>
+                            <div class="col">{{stavka.cenaSaPopustom}}</div>
+                            <div class="col">{{stavka.proizvodId.nazivProizvoda}}</div>
+                        </div>
+                    </div>
+                    <ion-row *ngIf="izabranaStavka.stavkaRacunaId != undefined">
+                        <ion-col>
+                            <ion-button (click)="izmeniStavku();" strong="true" color="success" expand="block"
+                                shape="round">
+                                Izmeni stavku
+                            </ion-button>
+                        </ion-col>
+                        <ion-col></ion-col>
+                        <ion-col>
+                            <ion-button (click)="obrisiStavku();" strong="true" color="danger" expand="block"
+                                shape="round">
+                                Obrisi stavku
+                            </ion-button>
+                        </ion-col>
+
+                    </ion-row>
+
+                    <ion-row *ngIf="stavkeRacuna.length>0">
+                        <ion-col size-sm="4">
+                            <ion-button (click)="getUkupnaCena();" strong="true" color="medium" expand="block"
+                                shape="round">
+                                Izracunaj ukupnu cenu
+                            </ion-button>
+                        </ion-col>
+                        <ion-col size-sm="4">
+                            <ion-item color="dark">
+                                <ion-label class="custom-label" color="warning">Ukupna cena racuna:</ion-label>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col>
+                            <ion-item size-sm="4">
+                                <ion-input name="ukCena" #ukCena="ngModel" ngModel type="text" readonly
+                                    [value]="ukupnaCena!=0 ? ukupnaCena : ''"></ion-input>
+                            </ion-item>
+                        </ion-col>
+
+                    </ion-row>
+                    <hr *ngIf="isProizvodIzabran" />
+                    <ion-row>
+                        <ion-col size-sm="5">
+                            <ion-item color="dark">
+                                <ion-label color="warning">Racun kreirao:</ion-label>
+                            </ion-item>
+                            <ion-item color="dark">
+                                <select id="radnikCB" (change)="onChangeRadnik($event)"
+                                    class="browser-default custom-select" name="radniciCB" #radniciCB="ngModel" ngModel>
+                                    <option *ngFor="let radnik of radnici" [value]="radnik.radnikId">
+                                        {{radnik.imePrezime}}</option>
+                                </select>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col></ion-col>
+                        <ion-col size-sm="5">
+                            <ion-item color="dark">
+                                <ion-label color="warning">Ime i prezime radnika:</ion-label>
+                            </ion-item>
+                            <ion-item class="inp-custom-radnik">
+                                <ion-input value="{{izabranRadnik.radnikId!=undefined ? izabranRadnik.imePrezime : ''}}"
+                                    name="imePrezime" #imePrezime="ngModel" ngModel type="text" readonly></ion-input>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col></ion-col>
+                    </ion-row>
+                    <ion-row class="ion-justify-content-center">
+                        <ion-col></ion-col>
+                        <ion-col>
+                          <ion-button
+                            type="submit"
+                            strong="true"
+                            color="warning"
+                            expand="block"
+                            shape="round"
+                            [disabled] = "activeRacun.racunKupcaId == undefined"
+                            >Azuriraj
+                          </ion-button>
+                        </ion-col>
+                        <ion-col></ion-col>
+                        <ion-col *ngIf = "activeRacun.racunKupcaId != undefined">
+                          <ion-button
+                          type="button"
+                          strong="true"
+                          color="danger"
+                          expand="block"
+                          shape="round"
+                          (click) = "obrisiRacun()"
+                          >Obrisi
+                        </ion-button>
+                        </ion-col>
+                        <ion-col  *ngIf = "activeRacun.racunKupcaId != undefined"></ion-col>
+                      </ion-row>
+                </ion-grid>
+            </form>
+        </ion-card>
+    </ion-content>
+</body>
